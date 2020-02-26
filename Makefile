@@ -21,12 +21,12 @@ $(DIR).up:
 	@$(CURDIR)/up.sh "$(CURDIR)/$(DIR)"
 
 .PHONY: $(DIR).down
-$(DIR).down: ## Run docker-compose down of the DIR.
+$(DIR).down:
 	@$(CURDIR)/down.sh "$(CURDIR)/$(DIR)"
 
 .PHONY: $(DIR).logs
-$(DIR).logs: ## Run docker-compose logs -f of the DIR.
+$(DIR).logs:
 	@$(CURDIR)/logs.sh "$(CURDIR)/$(DIR)"
 
 .PHONY: $(DIR).restart
-$(DIR).restart: $(DIR).down $(DIR).up	## Run docker-compose down & up of the DIR.
+$(DIR).restart: $(DIR).down $(DIR).up
