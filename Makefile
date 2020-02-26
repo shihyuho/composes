@@ -1,34 +1,32 @@
+DIR = $(shell command ls -d */ | cut -d '/' -f 1;)
+
+define printf
+  @echo $(1) $(2) | awk '{target=$$1":";sub(".*"$$2,$$2);printf "\033[36m%-30s\033[0m %s\n", target, $$0}'
+endef
+
 .PHONY: help
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	$(call printf, DIR.build, "Run docker-compose build of the DIR (ex. postgres.build).")
+	$(call printf, DIR.up, "Run docker-compose up of the DIR (ex. postgres.up).")
+	$(call printf, DIR.down, "Run docker-compose down of the DIR (ex. postgres.down).")
+	$(call printf, DIR.logs, "Run docker-compose logs -f of the DIR (ex: postgres.logs).")
+	$(call printf, DIR.restart, " Run docker-compose down & up of the DIR (ex: postgres.restart).")
 
-check_defined = \
-				$(strip $(foreach 1,$1, \
-				$(call __check_defined,$1,$(strip $(value 2)))))
-__check_defined = \
-				  $(if $(value $1),, \
-				  $(error Undefined $1$(if $2, ($2))$(if $(value @), \
-				  required by target `$@')))
-
-.PHONY: build
-build: ## Run docker-compose build of the DIR (ex. DIR=postgres).
-	@:$(call check_defined, DIR, directory of the docker-compose)
+.PHONY: $(DIR).build
+$(DIR).build:
 	@$(CURDIR)/build.sh "$(CURDIR)/$(DIR)"
 
-.PHONY: up
-up: ## Run docker-compose up of the DIR (ex. DIR=postgres).
-	@:$(call check_defined, DIR, directory of the docker-compose)
+.PHONY: $(DIR).up
+$(DIR).up:
 	@$(CURDIR)/up.sh "$(CURDIR)/$(DIR)"
 
-.PHONY: down
-down: ## Run docker-compose down of the DIR (ex. DIR=postgres).
-	@:$(call check_defined, DIR, directory of the docker-compose)
+.PHONY: $(DIR).down
+$(DIR).down: ## Run docker-compose down of the DIR.
 	@$(CURDIR)/down.sh "$(CURDIR)/$(DIR)"
 
-.PHONY: logs
-logs: ## Run docker-compose logs -f of the DIR (ex. DIR=postgres).
-	@:$(call check_defined, DIR, directory of the docker-compose)
+.PHONY: $(DIR).logs
+$(DIR).logs: ## Run docker-compose logs -f of the DIR.
 	@$(CURDIR)/logs.sh "$(CURDIR)/$(DIR)"
 
-.PHONY: restart
-restart: down up	## Run docker-compose down & up of the DIR (ex. DIR=postgres).
+.PHONY: $(DIR).restart
+$(DIR).restart: $(DIR).down $(DIR).up	## Run docker-compose down & up of the DIR.
